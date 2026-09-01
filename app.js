@@ -130,7 +130,6 @@ const steps = [
 ];
 
 const card = document.getElementById("lessonCard");
-const profileCard = document.getElementById("profileCard");
 const dossier = document.getElementById("dossier");
 const nextBtn = document.getElementById("nextBtn");
 const prevBtn = document.getElementById("prevBtn");
@@ -159,23 +158,13 @@ function setStatus(message = "", type = "") {
   appStatus.className = `status-message${type ? ` ${type}` : ""}`;
 }
 
-function updateProfile() {
+function profileSummary() {
   const levelPoints = state.markers.length + state.hobbies.length + Object.keys(state.choices).length + (state.name ? 1 : 0) + (state.goal ? 1 : 0);
   const level = levelPoints >= 9 ? "Pre-Intermediate / A2-B1" : levelPoints >= 5 ? "Elementary / A2" : levelPoints >= 2 ? "Beginner / A1" : "Starter / A0";
   const grammar = state.markers.filter((marker) => /Simple|Continuous|because|prefer|if-clause|to be/.test(marker)).slice(-2).join(" / ");
   const favorites = [state.color, state.pet, ...Object.values(state.choices)].filter(Boolean).join(" / ");
   const name = state.name.trim() || "New student";
-
-  document.getElementById("profileName").textContent = name;
-  document.getElementById("avatarInitial").textContent = name === "New student" ? "?" : name[0].toUpperCase();
-  document.getElementById("profileAge").textContent = state.age ? `${state.age} лет / 30 min mission` : "Имя и возраст появятся здесь";
-  document.getElementById("profileHobbies").innerHTML = state.hobbies.length ? state.hobbies.map((hobby) => `<span>${escapeHtml(hobby)}</span>`).join("") : "<i>Добавьте хобби</i>";
-  document.getElementById("profileFavorites").textContent = favorites || "Цвет / животное / выборы";
-  document.getElementById("profileGoal").textContent = state.goal || "Спросим в финале миссии";
-  document.getElementById("profileGrammar").textContent = grammar || "to be / Present Simple";
-  document.getElementById("profileLevel").textContent = level;
-  document.getElementById("profileSpeaking").textContent = levelPoints >= 7 ? "Строит развернутые фразы" : levelPoints >= 3 ? "Говорит фразами" : "Короткие ответы";
-  document.getElementById("levelMeter").style.width = `${Math.min(12 + levelPoints * 8, 100)}%`;
+  return { levelPoints, level, grammar, favorites, name };
 }
 
 function hydrateCurrentStep() {
@@ -200,35 +189,30 @@ function bindInputs() {
     state.feel = button.dataset.feel;
     card.querySelectorAll(".emoji").forEach((other) => other.classList.toggle("selected", other === button));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".feeling-option").forEach((button) => button.addEventListener("click", () => {
     state.feel = button.dataset.feelphrase;
     card.querySelectorAll(".feeling-option").forEach((other) => other.classList.toggle("selected", other === button));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".color-option").forEach((button) => button.addEventListener("click", () => {
     state.color = button.dataset.color;
     card.querySelectorAll(".color-option").forEach((other) => other.classList.toggle("selected", other === button));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".pet-option").forEach((button) => button.addEventListener("click", () => {
     state.pet = button.dataset.pet;
     card.querySelectorAll(".pet-option").forEach((other) => other.classList.toggle("selected", other === button));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".choice-option").forEach((button) => button.addEventListener("click", () => {
     state.choices[button.dataset.choiceGroup] = button.dataset.choice;
     card.querySelectorAll(`.choice-option[data-choice-group="${CSS.escape(button.dataset.choiceGroup)}"]`).forEach((other) => other.classList.toggle("selected", other === button));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".check").forEach((button) => button.addEventListener("click", () => {
@@ -236,7 +220,6 @@ function bindInputs() {
     state.markers = state.markers.includes(marker) ? state.markers.filter((item) => item !== marker) : [...state.markers, marker];
     button.classList.toggle("selected", state.markers.includes(marker));
     saveState();
-    updateProfile();
   }));
 
   card.querySelectorAll(".hobby").forEach((button) => button.addEventListener("click", () => {
@@ -251,7 +234,6 @@ function bindInputs() {
       button.classList.toggle("selected", state.hobbies.includes(hobby));
     }
     saveState();
-    updateProfile();
   }));
 
   ["nameInput", "ageInput", "sceneInput", "sceneLocationInput", "imagineInput", "notesInput"].forEach((id) => {
@@ -260,7 +242,6 @@ function bindInputs() {
     input.addEventListener("input", () => {
       state[id === "nameInput" ? "name" : id === "ageInput" ? "age" : id === "sceneInput" ? "scene" : id === "sceneLocationInput" ? "sceneLocation" : id === "imagineInput" ? "imagine" : "notes"] = input.value;
       saveState();
-      updateProfile();
     });
   });
 }
@@ -276,7 +257,6 @@ function render() {
   nextBtn.innerHTML = state.step === steps.length - 1 ? "GENERATE PROFILE <span aria-hidden=\"true\">↗</span>" : "NEXT MISSION <span aria-hidden=\"true\">→</span>";
   bindInputs();
   hydrateCurrentStep();
-  updateProfile();
   window.requestAnimationFrame(() => card.querySelector("h2")?.focus({ preventScroll: true }));
 }
 
@@ -344,7 +324,7 @@ function strengthList() {
 
 function renderDossier({ status = "ready", message = "Профиль собран", image = generatedImage } = {}) {
   const name = state.name.trim() || "New student";
-  const power = /A2|B1/.test(document.getElementById("profileLevel").textContent) ? "CONFIDENT EXPLORER" : "BRAVE BEGINNER";
+  const power = /A2|B1/.test(profileSummary().level) ? "CONFIDENT EXPLORER" : "BRAVE BEGINNER";
   const portrait = image ? `<img src="${escapeHtml(image)}" alt="Персональный комикс-портрет ${escapeHtml(name)}" />` : `<span>${escapeHtml(name[0].toUpperCase())}</span>`;
   const statusClass = status === "error" ? "error" : status === "loading" ? "loading" : "ready";
   dossier.hidden = false;
@@ -399,9 +379,7 @@ function resetStudent() {
   state = blankState();
   generatedImage = "";
   localStorage.removeItem(STORAGE_KEY);
-  profileCard.classList.remove("unlocked");
-  profileCard.classList.add("sealed");
-  document.getElementById("profileStatus").textContent = "LIVE";
+  document.getElementById("workspace")?.classList.remove("result-view");
   document.getElementById("workspace")?.classList.add("lesson-only");
   dossier.hidden = true;
   dossier.innerHTML = "";
@@ -434,9 +412,7 @@ nextBtn.addEventListener("click", () => {
     render();
   } else {
     document.getElementById("workspace")?.classList.remove("lesson-only");
-    profileCard.classList.remove("sealed");
-    profileCard.classList.add("unlocked");
-    document.getElementById("profileStatus").textContent = "READY";
+    document.getElementById("workspace")?.classList.add("result-view");
     generateStudentProfile();
   }
 });
@@ -460,7 +436,6 @@ function replaceFeelingChoices() {
     grid.querySelectorAll(".feeling-hotspot").forEach((other) => other.classList.toggle("selected", other === button));
     state.feel = button.dataset.feel;
     saveState();
-    updateProfile();
   }));
 }
 
@@ -475,7 +450,6 @@ function upgradeFeelingsActivity() {
   const updateNotes = () => {
     state.notes = [...wrap.querySelectorAll("textarea")].map((input) => input.value.trim()).filter(Boolean).join(" · ");
     saveState();
-    updateProfile();
   };
   wrap.querySelectorAll("textarea").forEach((input) => input.addEventListener("input", updateNotes));
   wrap.querySelector(".save-reflection").addEventListener("click", () => {
@@ -484,7 +458,6 @@ function upgradeFeelingsActivity() {
     wrap.querySelector(".save-reflection").textContent = "IDEAS SAVED ✓";
     state.markers = [...new Set([...state.markers, "longer answer", "because / connector"])];
     saveState();
-    updateProfile();
   });
 }
 

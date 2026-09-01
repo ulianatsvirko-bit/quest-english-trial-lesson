@@ -1335,8 +1335,9 @@ footer {
 
 @media print {
   body { background: #fff; }
-  .topbar, .hero, .workspace, footer, .dossier-actions, .dossier-status, .grain { display: none !important; }
+  .topbar, .hero, .lesson-column, footer, .dossier-actions, .dossier-status, .grain { display: none !important; }
   .app-shell { width: 100%; max-width: none; padding: 0; }
+  .workspace.result-view { display: block !important; padding: 0; }
   .dossier { display: block !important; width: 100%; margin: 0; box-shadow: none; border-width: 0.35rem; }
   .hero-card { grid-template-columns: 40% 60%; min-height: 24rem; }
   .hero-photo { min-height: 24rem; border-right: 0.35rem solid var(--ink); border-bottom: 0; }
@@ -1345,7 +1346,19 @@ footer {
 }
 
 /* Latest lesson flow: student-facing view, mood board and reflection prompts. */
-.workspace.lesson-only .profile-card { display: none; }
+.workspace.result-view {
+  grid-template-columns: minmax(0, 70rem);
+  justify-content: center;
+}
+
+.workspace.result-view .lesson-column {
+  display: none;
+}
+
+.workspace.result-view .dossier {
+  width: 100%;
+  margin: 0 auto;
+}
 
 @media (min-width: 761px) {
   .workspace.lesson-only {
