@@ -325,7 +325,10 @@ function strengthList() {
 function renderDossier({ status = "ready", message = "Профиль собран", image = generatedImage } = {}) {
   const name = state.name.trim() || "New student";
   const power = /A2|B1/.test(profileSummary().level) ? "CONFIDENT EXPLORER" : "BRAVE BEGINNER";
-  const portrait = image ? `<img src="${escapeHtml(image)}" alt="Персональный комикс-портрет ${escapeHtml(name)}" />` : `<span>${escapeHtml(name[0].toUpperCase())}</span>`;
+  const showOriginalPhoto = Boolean(state.photo) && (status === "loading" || (status === "error" && !image));
+  const portraitImage = showOriginalPhoto ? state.photo : image;
+  const portraitAlt = showOriginalPhoto ? `Оригинальное фото ${name}` : `Персональный комикс-портрет ${name}`;
+  const portrait = portraitImage ? `<img src="${escapeHtml(portraitImage)}" alt="${escapeHtml(portraitAlt)}" />` : `<span>${escapeHtml(name[0].toUpperCase())}</span>`;
   const statusClass = status === "error" ? "error" : status === "loading" ? "loading" : "ready";
   dossier.hidden = false;
   dossier.className = "dossier open";
