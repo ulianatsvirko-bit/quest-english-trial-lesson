@@ -1343,3 +1343,108 @@ footer {
   .dossier-grid { grid-template-columns: 1fr 1fr; }
   .dossier-grid article:nth-child(odd) { border-right: 0.25rem solid var(--ink); }
 }
+
+/* Latest lesson flow: student-facing view, mood board and reflection prompts. */
+.workspace.lesson-only .profile-card { display: none; }
+.teacher-note,
+.coach-box,
+.teacher-check { display: none !important; }
+
+.feeling-board {
+  position: relative;
+  width: min(100%, 40rem);
+  margin: 0.5rem auto 0;
+  border: 2px solid var(--ink);
+  background: #fff;
+  box-shadow: 5px 5px 0 #d8bf9b;
+}
+
+.feeling-board img { display: block; width: 100%; height: auto; }
+
+.feeling-hotspots {
+  position: absolute;
+  inset: 16% 5% 5%;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  gap: 3% 8%;
+}
+
+.feeling-hotspot {
+  min-width: 44px;
+  min-height: 44px;
+  border: 2px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.feeling-hotspot:hover,
+.feeling-hotspot.selected {
+  border-color: var(--orange);
+  background: rgb(237 109 67 / 18%);
+}
+
+.board-hint {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.sentence-task { display: grid; gap: 0.35rem; }
+.sentence-task b { font-size: 1.1rem; }
+.sentence-task span { font-size: 0.95rem; }
+.sentence-task strong { color: var(--orange); }
+.sentence-task small { color: var(--muted); font-size: 0.78rem; }
+
+.feelings-upgraded {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 0.5rem 0 1.2rem;
+}
+
+.reflection-prompt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.25rem 0.8rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: #fffdf6;
+  box-shadow: 3px 3px 0 #ead8b8;
+}
+
+.prompt-number {
+  grid-row: span 2;
+  padding: 0.25rem 0.45rem;
+  background: var(--orange);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.45rem;
+}
+
+.reflection-prompt b { font-size: 1.05rem; }
+.reflection-prompt small { display: block; margin-top: 0.2rem; color: var(--muted); font-size: 0.78rem; }
+.reflection-prompt textarea { grid-column: 2; width: 100%; min-height: 4rem; resize: vertical; border: 1px solid var(--line); background: #fff; padding: 0.7rem; font: inherit; }
+
+.save-reflection {
+  grid-column: 2;
+  justify-self: start;
+  min-height: 2.6rem;
+  margin-top: 0.35rem;
+  border: 1px solid var(--ink);
+  background: var(--yellow);
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.feelings-upgraded.saved .save-reflection { background: #74d27b; }
+.feelings-upgraded.saved .reflection-prompt { border-color: #74d27b; }
+
+@media (min-width: 700px) {
+  .feelings-upgraded { grid-template-columns: 1fr 1fr; }
+}

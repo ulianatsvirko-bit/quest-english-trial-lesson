@@ -13,6 +13,7 @@ const blankState = () => ({
   markers: [],
   notes: "",
   scene: "",
+  sceneLocation: "",
   imagine: "",
   photo: "",
 });
@@ -54,8 +55,8 @@ const steps = [
       <div class="prompt">“Why are you feeling this way?”</div>
       <div class="answer-row">${["Because I’m happy", "Because I’m tired", "Because I had a good day"].map((answer) => `<button class="option feeling-option" type="button" data-feelphrase="${answer}">${answer}</button>`).join("")}</div>
       <div class="deep-dive"><b>Если легко</b> “What makes you happy?” / “How do you feel on Mondays?”</div>
-      <div class="prompt">Mini role-play: choose a face and complete the sentence</div>
-      <div class="sentence-card">Today I feel <strong>________</strong> because <strong>________</strong>.</div>
+      <div class="prompt">One complete sentence</div>
+      <div class="sentence-card"><div class="sentence-task"><b>Tell me one thing about your day</b><span>Use the pattern: <strong>I feel ___ because ___.</strong></span><small>Example: I feel happy because I played with my friend.</small></div></div>
       <div class="teacher-check"><span>Грамматические маркеры</span>${["because / connector", "longer answer", "pronunciation"].map((marker) => `<button class="check" type="button" data-marker="${marker}">＋ ${marker}</button>`).join("")}</div>`,
   },
   {
@@ -91,12 +92,12 @@ const steps = [
     note: "Цель: проверить словарь, Present Continuous и воображение. Двигайся от простого к сложному.",
     html: `
       <div class="scene"><img src="assets/superhero-city-detective.jpeg" alt="Иллюстрация с супергероем и предметами для поиска" loading="lazy" /><span class="scene-label">SUPERHERO HQ / LOOK CLOSELY</span></div>
-      <div class="prompt">1 / “What can you see in the superhero headquarters?”</div>
-      <div class="answer-row"><input class="answer-input" id="sceneInput" aria-label="Ответ по картинке" placeholder="I can see…" /></div>
-      <div class="prompt">2 / “What is the superhero doing?”</div>
-      <div class="answer-row">${["The superhero is standing", "The robot cat is standing", "The rocket is on the roof"].map((answer) => `<button class="option scene-option" type="button" data-scene="${answer}">${answer}</button>`).join("")}</div>
-      <div class="prompt">3 / “What would you like to find first?”</div>
-      <div class="answer-row"><input class="answer-input" id="imagineInput" aria-label="Воображаемый ответ" placeholder="I would find…" /></div>
+      <div class="prompt">1 / “Look closely! Tell me three things you can see.”</div>
+      <div class="answer-row"><input class="answer-input" id="sceneInput" aria-label="Ответ по картинке" placeholder="I can see a… and a…" /></div>
+      <div class="prompt">2 / “Where is the telescope? Where is the rocket?”</div>
+      <div class="answer-row"><input class="answer-input" id="sceneLocationInput" aria-label="Ответ о расположении предметов" placeholder="The telescope is… / The rocket is…" /></div>
+      <div class="prompt">3 / “What are the superhero and robot cat doing?”</div>
+      <div class="answer-row"><input class="answer-input" id="imagineInput" aria-label="Ответ о действии персонажей" placeholder="They are…" /></div>
       <div class="teacher-check"><span>Проверь уровень</span>${["Present Continuous", "can / there is", "if-clause / imagination"].map((marker) => `<button class="check" type="button" data-marker="${marker}">＋ ${marker}</button>`).join("")}</div>`,
   },
   {
@@ -178,7 +179,7 @@ function updateProfile() {
 }
 
 function hydrateCurrentStep() {
-  const values = { nameInput: state.name, ageInput: state.age, sceneInput: state.scene, imagineInput: state.imagine, notesInput: state.notes };
+  const values = { nameInput: state.name, ageInput: state.age, sceneInput: state.scene, sceneLocationInput: state.sceneLocation, imagineInput: state.imagine, notesInput: state.notes };
   Object.entries(values).forEach(([id, value]) => {
     const input = document.getElementById(id);
     if (input) input.value = value || "";
@@ -253,11 +254,11 @@ function bindInputs() {
     updateProfile();
   }));
 
-  ["nameInput", "ageInput", "sceneInput", "imagineInput", "notesInput"].forEach((id) => {
+  ["nameInput", "ageInput", "sceneInput", "sceneLocationInput", "imagineInput", "notesInput"].forEach((id) => {
     const input = document.getElementById(id);
     if (!input) return;
     input.addEventListener("input", () => {
-      state[id === "nameInput" ? "name" : id === "ageInput" ? "age" : id === "sceneInput" ? "scene" : id === "imagineInput" ? "imagine" : "notes"] = input.value;
+      state[id === "nameInput" ? "name" : id === "ageInput" ? "age" : id === "sceneInput" ? "scene" : id === "sceneLocationInput" ? "sceneLocation" : id === "imagineInput" ? "imagine" : "notes"] = input.value;
       saveState();
       updateProfile();
     });
@@ -328,6 +329,7 @@ function studentPayload() {
     goal: state.goal,
     markers: state.markers,
     sceneAnswer: state.scene,
+    sceneLocation: state.sceneLocation,
     imagination: state.imagine,
     teacherNote: state.notes,
   };
@@ -400,6 +402,7 @@ function resetStudent() {
   profileCard.classList.remove("unlocked");
   profileCard.classList.add("sealed");
   document.getElementById("profileStatus").textContent = "LIVE";
+  document.getElementById("workspace")?.classList.add("lesson-only");
   dossier.hidden = true;
   dossier.innerHTML = "";
   updatePhotoControl();
@@ -430,6 +433,7 @@ nextBtn.addEventListener("click", () => {
     saveState();
     render();
   } else {
+    document.getElementById("workspace")?.classList.remove("lesson-only");
     profileCard.classList.remove("sealed");
     profileCard.classList.add("unlocked");
     document.getElementById("profileStatus").textContent = "READY";
@@ -445,3 +449,49 @@ prevBtn.addEventListener("click", () => {
 
 updatePhotoControl();
 render();
+
+function replaceFeelingChoices() {
+  const grid = document.querySelector(".emoji-grid");
+  if (!grid || grid.dataset.boardReady) return;
+  grid.dataset.boardReady = "1";
+  const labels = ["cute", "hungry", "sad", "funny", "relax", "scared", "happy", "tired", "angry"];
+  grid.innerHTML = `<div class="feeling-board"><img src="assets/how-are-you-today.jpeg" alt="How are you today? Выбери настроение" /><div class="feeling-hotspots">${labels.map((label) => `<button class="feeling-hotspot" type="button" data-feel="${label}" aria-label="${label}"></button>`).join("")}</div></div><p class="board-hint">Нажми на хомячка, который похож на твоё настроение</p>`;
+  grid.querySelectorAll(".feeling-hotspot").forEach((button) => button.addEventListener("click", () => {
+    grid.querySelectorAll(".feeling-hotspot").forEach((other) => other.classList.toggle("selected", other === button));
+    state.feel = button.dataset.feel;
+    saveState();
+    updateProfile();
+  }));
+}
+
+function upgradeFeelingsActivity() {
+  const option = document.querySelector(".feeling-option");
+  if (!option || option.closest(".feelings-upgraded")) return;
+  const wrap = document.createElement("div");
+  const previous = (state.notes || "").split(" · ");
+  wrap.className = "feelings-upgraded";
+  wrap.innerHTML = `<div class="reflection-prompt"><span class="prompt-number">01</span><div><b>Tell me 2–3 reasons</b><small>Why are you feeling this way today?</small></div><textarea aria-label="Two or three reasons" placeholder="Because…">${escapeHtml(previous[0] || "")}</textarea></div><div class="reflection-prompt"><span class="prompt-number">02</span><div><b>Good &amp; tricky moments</b><small>Name 2 good things and 2 difficult things from today.</small></div><textarea aria-label="Good and difficult things" placeholder="Two good things… Two difficult things…">${escapeHtml(previous[1] || "")}</textarea><button class="save-reflection" type="button">SAVE MY IDEAS ↗</button></div>`;
+  option.parentElement.replaceWith(wrap);
+  const updateNotes = () => {
+    state.notes = [...wrap.querySelectorAll("textarea")].map((input) => input.value.trim()).filter(Boolean).join(" · ");
+    saveState();
+    updateProfile();
+  };
+  wrap.querySelectorAll("textarea").forEach((input) => input.addEventListener("input", updateNotes));
+  wrap.querySelector(".save-reflection").addEventListener("click", () => {
+    updateNotes();
+    wrap.classList.add("saved");
+    wrap.querySelector(".save-reflection").textContent = "IDEAS SAVED ✓";
+    state.markers = [...new Set([...state.markers, "longer answer", "because / connector"])];
+    saveState();
+    updateProfile();
+  });
+}
+
+const lessonObserver = new MutationObserver(() => {
+  replaceFeelingChoices();
+  upgradeFeelingsActivity();
+});
+lessonObserver.observe(card, { childList: true, subtree: true });
+replaceFeelingChoices();
+upgradeFeelingsActivity();

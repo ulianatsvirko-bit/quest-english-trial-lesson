@@ -6,6 +6,9 @@
     <meta name="theme-color" content="#10232b" />
     <meta name="description" content="Интерактивный 30-минутный пробный урок Quest English для преподавателя." />
     <title>Quest English | Trial lesson</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -15,17 +18,12 @@
         <span class="brand-mark" aria-hidden="true">★</span>
         <span>QUEST<br /><em>ENGLISH</em></span>
       </a>
-      <div class="topbar-meta" aria-label="Параметры урока">
-        <span class="live-dot" aria-hidden="true"></span>
-        <span class="topbar-label">30-MIN TRIAL MISSION</span>
-        <span class="duration tabular-nums" id="currentTime">4 MIN</span>
-      </div>
     </header>
 
     <main class="app-shell" id="top">
       <section class="hero" aria-labelledby="pageTitle">
         <div class="hero-copy">
-          <p class="eyebrow">WELCOME, TEACHER / ПРОБНЫЙ УРОК</p>
+          <p class="eyebrow">WELCOME, TEACHER / РАСШИРЕННЫЙ ПРОБНЫЙ УРОК</p>
           <h1 id="pageTitle">Find your <span>English superpower</span></h1>
           <p class="hero-sub">Диагностический квест на 30 минут. Соберите живой профиль ученика по его ответам.</p>
           <button class="primary-btn" id="startBtn" type="button">START THE QUEST <span aria-hidden="true">↗</span></button>
@@ -37,7 +35,7 @@
         </div>
       </section>
 
-      <section class="workspace" id="workspace" aria-label="Консоль пробного урока">
+      <section class="workspace lesson-only" id="workspace" aria-label="Консоль пробного урока">
         <div class="lesson-column">
           <div class="workspace-tools">
             <label class="photo-control" for="photoInput">
@@ -103,6 +101,7 @@
       <span>Built for brave beginners</span>
     </footer>
 
+    <span id="currentTime" hidden>4 MIN</span>
     <script src="app.js"></script>
     <script src="interactions.js"></script>
   </body>

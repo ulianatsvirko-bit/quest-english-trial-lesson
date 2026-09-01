@@ -13,9 +13,15 @@
       const content = [...item.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent.trim()).join(" ");
       const wrapper = document.createElement("div");
       wrapper.className = "reveal-wrap";
-      wrapper.innerHTML = `<button class="reveal-btn" type="button">＋ ${title}</button><div class="reveal-panel"><b>Next level</b><div>${content}</div><div class="student-action"><button class="timer-btn" type="button">START 30 SEC</button><span class="timer-display tabular-nums"></span></div></div>`;
+      wrapper.innerHTML = `<button class="reveal-btn" type="button">👆 НАЖМИ МЕНЯ — СЛЕДУЮЩИЙ ВОПРОС!</button><div class="reveal-panel"><b>✨ ДОПОЛНИТЕЛЬНЫЙ ВОПРОС</b><div>${content}</div><div class="student-action"><button class="timer-btn" type="button">⏱ Ответить за 30 секунд</button><span class="timer-display tabular-nums"></span></div></div>`;
       item.replaceWith(wrapper);
     });
+    if (!card.querySelector(".student-tip")) {
+      const tip = document.createElement("p");
+      tip.className = "student-tip";
+      tip.textContent = "Ответь на главный вопрос, а затем нажми кнопку — там тебя ждёт следующий уровень!";
+      card.appendChild(tip);
+    }
   }
 
   card.addEventListener("click", (event) => {
@@ -57,5 +63,5 @@
 
   const observer = new MutationObserver(enhanceBonusQuestions);
   observer.observe(card, { childList: true, subtree: true });
-  enhanceBonusQuestions();
+ enhanceBonusQuestions();
 })();
