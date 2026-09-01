@@ -1346,6 +1346,18 @@ footer {
 
 /* Latest lesson flow: student-facing view, mood board and reflection prompts. */
 .workspace.lesson-only .profile-card { display: none; }
+
+@media (min-width: 761px) {
+  .workspace.lesson-only {
+    grid-template-columns: minmax(0, 56rem);
+    justify-content: center;
+  }
+
+  .workspace.lesson-only .lesson-column {
+    width: 100%;
+  }
+}
+
 .teacher-note,
 .coach-box,
 .teacher-check { display: none !important; }
