@@ -21,7 +21,7 @@ const blankState = () => ({
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    return saved ? { ...blankState(), ...saved, choices: saved.choices || {} } : blankState();
+    return saved ? { ...blankState(), ...saved, step: 0, choices: saved.choices || {} } : blankState();
   } catch {
     return blankState();
   }
