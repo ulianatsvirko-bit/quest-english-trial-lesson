@@ -1,8 +1,61 @@
 (() => {
-  const style = document.createElement('style');
-  style.textContent = `.reveal-wrap{margin:1rem 0}.reveal-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;border:1px solid var(--ink);background:var(--cream);padding:.65rem .85rem;font:700 .7rem 'DM Sans';letter-spacing:.08em;cursor:pointer}.reveal-btn:hover,.reveal-btn.open{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.reveal-panel{display:none;background:#ede3f7;border-left:.35rem solid var(--lilac);padding:.9rem 1rem;margin-top:.55rem;line-height:1.55;font-size:.92rem}.reveal-panel.show{display:block;animation:slideIn .25s ease}.reveal-panel b{display:block;color:var(--ink);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}.student-action{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}.timer-btn{min-height:40px;border:1px solid var(--orange);background:transparent;padding:.5rem .7rem;font:700 .68rem 'DM Sans';cursor:pointer}.timer-btn.active{background:var(--orange);color:#fff}.timer-display{font:700 1rem 'Bebas Neue';letter-spacing:.08em;color:var(--orange);min-width:3.5rem}@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}`;
-  document.head.appendChild(style);
-  const card = document.getElementById('lessonCard'); let timerId;
-  function enhance(){if(!card)return;card.querySelectorAll('.deep-dive').forEach(item=>{if(item.dataset.enhanced)return;item.dataset.enhanced='true';const raw=item.innerHTML,match=raw.match(/<b>(.*?)<\/b>(.*)/s),title=match?match[1].replace('→','').trim():'Bonus question',content=match?match[2].trim():raw,wrap=document.createElement('div');wrap.className='reveal-wrap';wrap.innerHTML=`<button class="reveal-btn" type="button">＋ ${title}</button><div class="reveal-panel"><b>Next level</b><div>${content}</div><div class="student-action"><button class="timer-btn" type="button">⏱ Start 30 sec</button><span class="timer-display"></span></div></div>`;item.replaceWith(wrap);const reveal=wrap.querySelector('.reveal-btn'),panel=wrap.querySelector('.reveal-panel');reveal.onclick=()=>{panel.classList.toggle('show');reveal.classList.toggle('open');reveal.textContent=panel.classList.contains('show')?'− HIDE BONUS':`＋ ${title}`};const timer=wrap.querySelector('.timer-btn'),display=wrap.querySelector('.timer-display');timer.onclick=()=>{clearInterval(timerId);let seconds=30;timer.classList.add('active');timer.textContent='⏸ Pause';display.textContent='00:30';timerId=setInterval(()=>{seconds--;display.textContent=`00:${String(seconds).padStart(2,'0')}`;if(seconds<=0){clearInterval(timerId);timer.classList.remove('active');timer.textContent='↻ Try again';display.textContent='TIME!'}},1000)} });if(!card.querySelector('.student-tip')){const tip=document.createElement('p');tip.className='student-tip';tip.textContent='Сначала ответь на базовый вопрос. Если готов — открой Bonus question и усложни ответ.';card.appendChild(tip)}}
-  new MutationObserver(enhance).observe(card,{childList:true,subtree:true}); enhance();
+  const card = document.getElementById("lessonCard");
+  if (!card) return;
+
+  let timerId = null;
+  let remaining = 30;
+
+  function enhanceBonusQuestions() {
+    card.querySelectorAll(".deep-dive").forEach((item) => {
+      if (item.dataset.enhanced) return;
+      item.dataset.enhanced = "true";
+      const title = item.querySelector("b")?.textContent.trim() || "Bonus question";
+      const content = [...item.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent.trim()).join(" ");
+      const wrapper = document.createElement("div");
+      wrapper.className = "reveal-wrap";
+      wrapper.innerHTML = `<button class="reveal-btn" type="button">＋ ${title}</button><div class="reveal-panel"><b>Next level</b><div>${content}</div><div class="student-action"><button class="timer-btn" type="button">START 30 SEC</button><span class="timer-display tabular-nums"></span></div></div>`;
+      item.replaceWith(wrapper);
+    });
+  }
+
+  card.addEventListener("click", (event) => {
+    const reveal = event.target.closest(".reveal-btn");
+    if (reveal) {
+      const panel = reveal.nextElementSibling;
+      const open = panel.classList.toggle("show");
+      reveal.classList.toggle("open", open);
+      reveal.textContent = open ? "− HIDE BONUS" : `＋ ${reveal.textContent.replace(/^[-＋] /, "")}`;
+      return;
+    }
+
+    const timer = event.target.closest(".timer-btn");
+    if (!timer) return;
+    const display = timer.parentElement.querySelector(".timer-display");
+    if (timerId) {
+      window.clearInterval(timerId);
+      timerId = null;
+      timer.classList.remove("active");
+      timer.textContent = "RESUME 30 SEC";
+      return;
+    }
+    remaining = 30;
+    timer.classList.add("active");
+    timer.textContent = "PAUSE";
+    display.textContent = "00:30";
+    timerId = window.setInterval(() => {
+      remaining -= 1;
+      display.textContent = `00:${String(remaining).padStart(2, "0")}`;
+      if (remaining <= 0) {
+        window.clearInterval(timerId);
+        timerId = null;
+        timer.classList.remove("active");
+        timer.textContent = "TRY AGAIN";
+        display.textContent = "TIME";
+      }
+    }, 1000);
+  });
+
+  const observer = new MutationObserver(enhanceBonusQuestions);
+  observer.observe(card, { childList: true, subtree: true });
+  enhanceBonusQuestions();
 })();
