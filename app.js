@@ -322,6 +322,24 @@ function strengthList() {
   return [...strengths, state.goal ? `Знает, зачем учит английский` : "Не боится пробовать новое"];
 }
 
+function heroFactList() {
+  const facts = [];
+  const feeling = state.feel.replace(/^Because I[’']m\s+/i, "").replace(/^I[’']m\s+/i, "");
+  const choices = Object.values(state.choices).filter(Boolean);
+
+  if (state.goal) facts.push({ icon: "🎯", label: "Английская цель", value: state.goal });
+  if (state.pet) facts.push({ icon: "🐾", label: "Питомец", value: /^No pet/i.test(state.pet) ? "Питомца пока нет" : state.pet });
+  if (state.color) facts.push({ icon: "🎨", label: "Любимый цвет", value: state.color });
+  if (state.age) facts.push({ icon: "🎂", label: "Возраст", value: `${state.age} лет` });
+  if (feeling) facts.push({ icon: "✨", label: "Настроение сегодня", value: feeling });
+  if (choices.length) facts.push({ icon: "⚡", label: "Быстрый выбор", value: choices.join(" / ") });
+
+  return facts.length ? facts.slice(0, 6) : [
+    { icon: "🌟", label: "Характер героя", value: "Любопытный исследователь" },
+    { icon: "🚀", label: "Новая миссия", value: "Говорить по-английски увереннее" },
+  ];
+}
+
 function renderDossier({ status = "ready", message = "Профиль собран", image = generatedImage } = {}) {
   const name = state.name.trim() || "New student";
   const power = /A2|B1/.test(profileSummary().level) ? "CONFIDENT EXPLORER" : "BRAVE BEGINNER";
@@ -339,7 +357,7 @@ function renderDossier({ status = "ready", message = "Профиль собра�
     </div>
     <div class="dossier-status ${statusClass}" role="status">${escapeHtml(message)}</div>
     <div class="hero-card"><div class="hero-photo ${status === "loading" ? "is-loading" : ""}" id="dossierPortrait">${portrait}</div><div class="hero-name"><span class="card-kicker">ДОСЬЕ ГЕРОЯ / STUDENT EDITION</span><h2>${escapeHtml(name.toUpperCase())}</h2><p>${escapeHtml(state.goal ? `Миссия: ${state.goal}` : "Готов к своей английской миссии")}</p><div class="power-badge">${power}</div></div></div>
-    <div class="dossier-grid"><article><h3>СУПЕР-СИЛЫ</h3><ul>${strengthList().map((strength) => `<li>${escapeHtml(strength)}</li>`).join("")}</ul></article><article><h3>МИР ИНТЕРЕСОВ</h3><div class="big-chips">${(state.hobbies.length ? state.hobbies : ["Curiosity", "Brave speaking"]).map((hobby) => `<span>${escapeHtml(hobby)}</span>`).join("")}</div><p class="quote">«Каждый ответ поднимает уровень»</p></article><article><h3>МИНИ-МАРШРУТ</h3><p>${escapeHtml(state.goal || "Собрать уверенность и говорить фразами на английском.")}</p>${state.notes ? `<p><strong>Заметка:</strong> ${escapeHtml(state.notes)}</p>` : ""}</article><article class="stamp"><span>QUEST<br />ENGLISH</span><strong>APPROVED<br />BY TEACHER</strong></article></div>`;
+    <div class="dossier-grid"><article><h3>СУПЕР-СИЛЫ</h3><ul>${strengthList().map((strength) => `<li>${escapeHtml(strength)}</li>`).join("")}</ul></article><article><h3>МИР ИНТЕРЕСОВ</h3><div class="big-chips">${(state.hobbies.length ? state.hobbies : ["Curiosity", "Brave speaking"]).map((hobby) => `<span>${escapeHtml(hobby)}</span>`).join("")}</div><p class="quote">«Каждый ответ поднимает уровень»</p></article><article><h3>ФАКТЫ О ГЕРОЕ</h3><ul class="hero-facts">${heroFactList().map((fact) => `<li><span aria-hidden="true">${fact.icon}</span><div><strong>${escapeHtml(fact.label)}</strong>${escapeHtml(fact.value)}</div></li>`).join("")}</ul></article><article class="stamp"><span>QUEST<br />ENGLISH</span><strong>APPROVED<br />BY TEACHER</strong></article></div>`;
   dossier.scrollIntoView({ behavior: "smooth", block: "start" });
   document.getElementById("printBtn").addEventListener("click", () => window.print());
   document.getElementById("regenerateBtn").addEventListener("click", () => generateStudentProfile(true));
